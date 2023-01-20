@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login Page</title>
+  <style>
+  body {
+    font-family: sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    background-color: #f1f1f1;
+  }
+
+  h1 {
+    margin: 50px 0 20px 0;
+    color: #333;
+  }
+
+  form {
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: left;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+
+  label {
+    display: block;
+    margin: 10px 0;
+    color: #555;
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  input[type="button"] {
+    width: 100%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  input[type="button"]:hover {
+    background-color: #45a049;
+  }
+
+  #message {
+    margin: 20px 0;
+    color: #333;
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+  <h1>Login Page</h1>
+
+  <!-- form for logging in -->
+  <form id="login-form">
+    <label for="username">Username:</label><br>
+    <input type="text" id="username" name="username"><br>
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password"><br><br>
+    <input type="button" value="Log In" onclick="login()">
+  </form>
+
+  <!-- form for creating an account -->
+  <form id="create-account-form">
+    <h2>Create an Account</h2>
+    <label for="new-username">Username:</label><br>
+    <input type="text" id="new-username" name="new-username"><br>
+    <label for="new-password">Password:</label><br>
+    <input type="password" id="new-password" name="new-password"><br><br>
+    <input type="button" value="Create Account" onclick="createAccount()">
+  </form>
+
+  <!-- display a message when the user logs in or creates an account -->
+  <div id="message"></div>
+
+  <script>
+    // Initialize an empty array to store user accounts
+    let accounts = [];
+
+    // Function to log in the user
+    function login() {
+      // Get the username and password from the login form
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      // Read the accounts from the JSON file
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".json";
+      input.addEventListener("change", function() {
+        const file = this.files[0];
+        const reader = new FileReader();
+        reader.addEventListener("load", function() {
+          // Parse the JSON string and store the accounts in the accounts array
+          accounts = JSON.parse(this.result);
+
+          // Check if the username and password match an existing account
+          for (let i = 0; i < accounts.length; i++) {
+            if (accounts[i].username === username && accounts[i].password === password) {
+              // If the username and password match, display a success message and redirect the user to the main page
+              document.getElementById("message").innerHTML = "Logged in successfully!";
+              window.location.href = "index.html";
+              return;
+            }
+          }
+
+          // If no matching account was found, display an error message
+          document.getElementById("message").innerHTML = "Invalid username or password";
+        });
+        reader.readAsText(file);
+      });
+      input.click();
+    }
+
+    // Function to create a new account
+    function createAccount() {
+      // Get the username and password from the create account form
+      const username = document.getElementById("new-username").value;
+      const password = document.getElementById("new-password").value;
+
+      // Check if the username is already taken
+      for (let i = 0; i < accounts.length; i++) {
+        if (accounts[i].username === username) {
+          // If the username is already taken, display an error message
+          document.getElementById("message").innerHTML = "Username already taken";
+          return;
+        }
+      }
+
+      // If the username is available, create a new account object and add it to the array of accounts
+      const newAccount = { username: username, password: password };
+      accounts.push(newAccount);
+
+      // Save the updated accounts array to a JSON file
+      saveAccountsToJSON();
+
+      // Display a success message
+      document.getElementById("message").innerHTML = "Account created successfully!";
+    }
+
+    // Function to save the accounts array to a JSON file
+    function saveAccountsToJSON() {
+      // Convert the accounts array to a JSON string
+      const accountsJSON = JSON.stringify(accounts);
+
+      // Create a link element and trigger a download of the JSON file
+      const a = document.createElement("a");
+      a.href = "data:text/json," + encodeURIComponent(accountsJSON);
+      a.download = "accounts.json";
+      a.click();
+    }
+  </script>
+</body>
+</html>
